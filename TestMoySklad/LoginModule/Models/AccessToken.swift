@@ -14,3 +14,7 @@ struct AccessToken: Codable {
         case accessToken = "access_token"
     }
 }
+
+struct AccessTokenResponse: Codable {
+    let accessToken: String
+}

@@ -8,19 +8,17 @@
 import Foundation
 import Combine
 
-final class ViewModel: ObservableObject {
-    struct AccessTokenResponse: Codable {
-        let accessToken: String
-    }
+final class LoginViewModel: ObservableObject {
     
     //constants
     let username = "admin@73novgor"
     let password  = "Golyb138@"
+    
+    //dependences
     let networkManager: NetworkManagerProtocol!
     let keychainManager: KeychainManagerProtocol!
     
     //Published var
-    @Published var accessToken: String = ""
     @Published var products: Product?
     @Published var isLoading = false
     @Published var errorMessage: String?
@@ -64,18 +62,6 @@ final class ViewModel: ObservableObject {
             self?.isLoading = false
         }
     }
-    
-    //MARK: - getProducts
-//    private func getProducts() {
-//        networkManager.getProducts(token: accessToken) { [weak self] result in
-//            switch result {
-//            case .success(let products):
-//                self?.products = products
-//            case .failure(let error):
-//                print(error)
-//            }
-//        }
-//    }
     
     //MARK: - saveToken
     private func saveToken(token: String) {

@@ -7,9 +7,9 @@
 
 import SwiftUI
 
-struct ContentView: View {
+struct LoginView: View {
     //observedObjects
-    @ObservedObject var viewModel: ViewModel
+    @ObservedObject var viewModel: LoginViewModel
     
     //states
     @State private var loginText = ""
@@ -54,7 +54,7 @@ struct ContentView: View {
     }
     
     //MARK: - init
-    init(viewModel: ViewModel) {
+    init(viewModel: LoginViewModel) {
         self.viewModel = viewModel
     }
     
@@ -81,5 +81,5 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(viewModel: DependencyInjector.resolvePostViewModel())
+    LoginView(viewModel: DependencyInjector.getLoginViewModel())
 }
