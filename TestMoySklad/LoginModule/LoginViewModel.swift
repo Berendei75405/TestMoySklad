@@ -30,6 +30,7 @@ final class LoginViewModel: ObservableObject {
          keychainManager: KeychainManagerProtocol) {
         self.networkManager = networkManager
         self.keychainManager = keychainManager
+        saveLoginAndPassword()
     }
     
     //MARK: - fetchToken
@@ -80,6 +81,37 @@ final class LoginViewModel: ObservableObject {
         //время через которое уберется ошибка
         DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
             self.errorMessage = nil
+        }
+    }
+    
+    //MARK: - saveLoginAndPassword
+    private func saveLoginAndPassword() {
+        //save login
+        do  {
+            let key = "Login"
+            keychainManager.attributes = [
+                kSecAttrLabel: key
+            ]
+            
+            try keychainManager.saveItem(username, itemClass: .generic, key: key)
+        } catch let keychainError as KeychainError {
+            print(keychainError)
+        } catch {
+            print(error)
+        }
+        
+        //save password
+        do  {
+            let key = "password"
+            keychainManager.attributes = [
+                kSecAttrLabel: key
+            ]
+            
+            try keychainManager.saveItem(password, itemClass: .generic, key: key)
+        } catch let keychainError as KeychainError {
+            print(keychainError)
+        } catch {
+            print(error)
         }
     }
 }

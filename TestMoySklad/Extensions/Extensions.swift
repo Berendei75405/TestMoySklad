@@ -16,6 +16,21 @@ extension View {
 
 //MARK: - NetworkError
 enum NetworkError: Error {
-    case errorWithDescription(String)
+    case theRequestedResourceMoved
+    case invalidSyntaxOrCannotBeExecuted
+    case serverError
     case error(Error)
+    
+    var description: String {
+        switch self {
+        case .theRequestedResourceMoved:
+            return "Запрошенный ресурс перемещен в другое место."
+        case .invalidSyntaxOrCannotBeExecuted:
+            return "Запрос содержит неверный синтаксис или не может быть выполнен."
+        case .serverError:
+            return "Сервер не смог выполнить запрос."
+        case .error(let error):
+            return "\(error.localizedDescription)"
+        }
+    }
 }
