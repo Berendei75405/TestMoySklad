@@ -22,11 +22,11 @@ final class NetworkService: NetworkServiceProtocol {
             if let httpResponse = response as? HTTPURLResponse {
                 switch httpResponse.statusCode {
                 case 300..<400:
-                    return completion(.failure(.errorWithDescription("Запрошенный ресурс перемещен в другое место.")))
+                    return completion(.failure(.theRequestedResourceMoved))
                 case 400..<500:
-                    return completion(.failure(.errorWithDescription("Запрос содержит неверный синтаксис или не может быть выполнен.")))
+                    return completion(.failure(.invalidSyntaxOrCannotBeExecuted))
                 case 500..<600:
-                    return completion(.failure(.errorWithDescription("Сервер не смог выполнить запрос.")))
+                    return completion(.failure(.serverError))
                 default:
                     break
                 }
@@ -34,7 +34,7 @@ final class NetworkService: NetworkServiceProtocol {
             
             //необработанная ошибка
             if let error = error {
-                completion(.failure(.errorWithDescription("Возникла непредвиденная ошибка или отсутствует соединение с интернетом")))
+                completion(.failure(.error(error)))
                 print(error)
             }
             
@@ -48,7 +48,7 @@ final class NetworkService: NetworkServiceProtocol {
                         
                         completion(.success(decodedData))
                     } catch {
-                        completion(.failure(.errorWithDescription("\(error)")))
+                        completion(.failure(.error(error)))
                     }                    
                 }
             }
