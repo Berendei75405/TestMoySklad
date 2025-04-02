@@ -19,6 +19,9 @@ enum NetworkError: Error {
     case theRequestedResourceMoved
     case invalidSyntaxOrCannotBeExecuted
     case serverError
+    case unknownError
+    case invalidURL
+    case invalidLoginOrPassword
     case error(Error)
     
     var description: String {
@@ -29,6 +32,12 @@ enum NetworkError: Error {
             return "Запрос содержит неверный синтаксис или не может быть выполнен."
         case .serverError:
             return "Сервер не смог выполнить запрос."
+        case .unknownError:
+            return "Возникла неизвестная ошибка"
+        case .invalidURL:
+            return "URL не действителен"
+        case .invalidLoginOrPassword:
+            return "Неправильный логин или пароль"
         case .error(let error):
             return "\(error.localizedDescription)"
         }

@@ -13,8 +13,7 @@ final class DependencyInjector: AnyObject {
         let networkService = NetworkService()
         let networkManager = NetworkManager(networkService: networkService)
         let keychainManager = KeychainManager()
-//        let persistentContainer = NSPersistentContainer(name: "YourContainerName")
-//        let coreDataManager = DefaultCoreDataManager(persistentContainer: persistentContainer)
+        
         return LoginViewModel(networkManager: networkManager, keychainManager: keychainManager)
     }
     

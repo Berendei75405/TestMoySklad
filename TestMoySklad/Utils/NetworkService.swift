@@ -8,54 +8,51 @@
 import Foundation
 
 protocol NetworkServiceProtocol: AnyObject {
-    func executeRequest<T: Decodable>(request: URLRequest, completion: @escaping (Result<T, NetworkError>) -> Void)
+    func executeRequest<T: Decodable>(request: URLRequest) async throws -> T
 }
 
 final class NetworkService: NetworkServiceProtocol {
     
     //MARK: - executeRequest
-    func executeRequest<T: Decodable>(request: URLRequest, completion: @escaping (Result<T, NetworkError>) -> Void) {
-        
-        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+    func executeRequest<T: Decodable>(request: URLRequest) async throws -> T {
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
             
-            //обработанная ошибка
-            if let httpResponse = response as? HTTPURLResponse {
-                switch httpResponse.statusCode {
-                case 300..<400:
-                    return completion(.failure(.theRequestedResourceMoved))
-                case 400..<500:
-                    return completion(.failure(.invalidSyntaxOrCannotBeExecuted))
-                case 500..<600:
-                    return completion(.failure(.serverError))
-                default:
-                    break
-                }
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkError.unknownError
             }
             
-            //необработанная ошибка
-            if let error = error {
-                completion(.failure(.error(error)))
-                print(error)
+            //обработка ошибок
+            switch httpResponse.statusCode {
+            case 300..<400:
+                throw NetworkError.theRequestedResourceMoved
+            case 400..<500:
+                throw NetworkError.invalidSyntaxOrCannotBeExecuted
+            case 500..<600:
+                throw NetworkError.serverError
+            default:
+                break
             }
             
-            //обработка успешного ответа
-            if let data = data {
-                DispatchQueue.main.async {
-                    do {
-                        let decoder = JSONDecoder()
-                        decoder.dateDecodingStrategy = .iso8601
-                        let decodedData = try decoder.decode(T.self, from: data)
-                        
-                        completion(.success(decodedData))
-                    } catch {
-                        completion(.failure(.error(error)))
-                    }                    
-                }
+            //декодирование
+            let decoder = JSONDecoder()
+            decoder.dateDecodingStrategy = .iso8601
+            
+            do {
+                return try decoder.decode(T.self, from: data)
+            } catch {
+                throw NetworkError.error(error)
+            }
+        } catch {
+            if let error = error as? URLError {
+                throw NetworkError.error(error)
+            } else if let error = error as? NetworkError {
+                throw error
+            } else {
+                throw NetworkError.error(error)
             }
         }
         
-        //отправляем запрос
-        task.resume()
     }
 }
 
