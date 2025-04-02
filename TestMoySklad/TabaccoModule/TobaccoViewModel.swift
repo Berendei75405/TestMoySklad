@@ -15,6 +15,7 @@ final class TobaccoViewModel: ObservableObject {
     
     //published
     @Published var errorMessage: String?
+    @Published var isLoading: Bool = false
     
     //init
     init(keychainManager: KeychainManagerProtocol,
@@ -25,15 +26,24 @@ final class TobaccoViewModel: ObservableObject {
     
     //MARK: - getProduct
     func getProduct() {
-        let token = getToken()
-        networkManager.getProducts(token: token) { [weak self] result in
-            switch result {
-            case .success(let product):
-                print(product)
-            case .failure(let error):
-                self?.errorMessage = error.localizedDescription
-            }
-        }
+//        let token = getToken()
+//        networkManager.getProducts(token: token) { [weak self] result in
+//            switch result {
+//            case .success(let product):
+//                print(product)
+//            case .failure(let error):
+//                print(error)
+//                DispatchQueue.main.async {
+//                    self?.errorMessage = error.description                    
+//                }
+//                switch error {
+//                case .invalidSyntaxOrCannotBeExecuted:
+//                    self?.updateToken()
+//                default:
+//                    break
+//                }
+//            }
+       // }
     }
     
     //MARK: - getToken
@@ -52,5 +62,22 @@ final class TobaccoViewModel: ObservableObject {
         } catch {
             return error.localizedDescription
         }
+    }
+    
+    //MARK: - updateToken
+    func updateToken() {
+//        guard let login: String = try? keychainManager.retrieveItem(ofClass: .generic, key: "Login") else { return }
+//        guard let password: String = try? keychainManager.retrieveItem(ofClass: .generic, key: "Password") else { return }
+//        networkManager.getAccessToken(username: login, password: password) { [weak self] result in
+//            switch result {
+//            case .success(let token):
+//                try? self?.keychainManager.updateItem(with: token.accessToken, ofClass: .generic, key: "ApiToken")
+//            case .failure(let error):
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
+//                    self?.errorMessage = error.localizedDescription
+//                }
+//            }
+//            self?.isLoading = false
+//        }
     }
 }

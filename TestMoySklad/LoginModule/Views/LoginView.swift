@@ -14,7 +14,6 @@ struct LoginView: View {
     //states
     @State private var loginText = ""
     @State private var passwordText = ""
-    @State private var enterState = false
     
     var body: some View {
         ZStack {
@@ -30,14 +29,15 @@ struct LoginView: View {
                     .textFieldStyle(.roundedBorder)
                     .neumorphism(isSelected: false)
                 Button {
-                    viewModel.fetchToken(login: loginText, password: passwordText)
-                    enterState.toggle()
+                    Task {
+                        await viewModel.fetchToken(login: loginText, password: passwordText)
+                    }
                 } label: {
                     Text("Войти")
                         .frame(width: 200, height: 50)
                         .background(Color("background"))
                         .clipShape(.buttonBorder)
-                        .neumorphism(isSelected: enterState)
+                        .neumorphism(isSelected: false)
                         .padding(.top)
                 }
                 Spacer()
@@ -50,6 +50,10 @@ struct LoginView: View {
             ProgressView()
                 .opacity(viewModel.isLoading ? 1 : 0)
         }
+        //появление следующего экрана при удачной авторизации
+        .fullScreenCover(isPresented: $viewModel.isShowScreen, content: {
+            TobaccoView(viewModel: DependencyInjector.getTobaccoViewModel())
+        })
         .background(Color("background"))
     }
     

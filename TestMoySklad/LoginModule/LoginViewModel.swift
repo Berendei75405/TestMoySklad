@@ -19,11 +19,9 @@ final class LoginViewModel: ObservableObject {
     let keychainManager: KeychainManagerProtocol!
     
     //Published var
-    @Published var products: Product?
     @Published var isLoading = false
     @Published var errorMessage: String?
-    
-    private var cancellables = Set<AnyCancellable>()
+    @Published var isShowScreen = false
     
     //MARK: - init
     init(networkManager: NetworkManagerProtocol,
@@ -34,33 +32,43 @@ final class LoginViewModel: ObservableObject {
     }
     
     //MARK: - fetchToken
-    func fetchToken(login: String, password: String) {
-        isLoading = true
+    func fetchToken(login: String, password: String) async {
+        await MainActor.run {
+            self.isLoading = true
+        }
         if login == username && password == self.password {
-            errorMessage = nil
-            getAccessToken()
-        } else {
-            errorMessage = "Неправильно введен логин или пароль!"
-            isLoading = false
-            //время через которое уберется ошибка
-            DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                self.errorMessage = nil
+            await MainActor.run {
+                errorMessage = nil
             }
+            do {
+                try await getAccessToken()
+            } catch let networkError as NetworkError {
+                showError(error: networkError.description)
+            } catch {
+                showError(error: error.localizedDescription)
+            }
+        } else {
+            showError(error: "Неправильный логин или пароль")
         }
     }
     
     //MARK: - getAccessToken
-    private func getAccessToken() {
-        networkManager.getAccessToken(username: username, password: password) { [weak self] result in
-            switch result {
-            case .success(let token):
-                self?.saveToken(token: token.accessToken)
-            case .failure(let error):
-                DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-                    self?.errorMessage = error.localizedDescription
+    private func getAccessToken() async throws {
+        Task {
+            do {
+                let accessToken = try await networkManager.getAccessToken(username: username, password: password).accessToken
+                await MainActor.run {
+                    isShowScreen.toggle()
                 }
+                saveToken(token: accessToken)
+            } catch let networkError as NetworkError {
+                showError(error: networkError.description)
+            } catch {
+                showError(error: error.localizedDescription)
             }
-            self?.isLoading = false
+            await MainActor.run {
+                isLoading = false
+            }
         }
     }
     
@@ -77,10 +85,6 @@ final class LoginViewModel: ObservableObject {
             self.errorMessage = keychainError.description
         } catch {
             self.errorMessage = error.localizedDescription
-        }
-        //время через которое уберется ошибка
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5) {
-            self.errorMessage = nil
         }
     }
     
@@ -102,7 +106,7 @@ final class LoginViewModel: ObservableObject {
         
         //save password
         do  {
-            let key = "password"
+            let key = "Password"
             keychainManager.attributes = [
                 kSecAttrLabel: key
             ]
@@ -113,5 +117,29 @@ final class LoginViewModel: ObservableObject {
         } catch {
             print(error)
         }
+    }
+    
+    //MARK: - checkToken
+    func checkToken() -> String? {
+        do {
+            let key = "ApiToken"
+            keychainManager.attributes = [
+                kSecAttrLabel: key
+            ]
+            
+            let token: String = try keychainManager.retrieveItem(ofClass: .generic, key: key)
+            return token
+        } catch {
+            return nil
+        }
+    }
+    
+    //MARK: - showError
+    private func showError(error: String) {
+        errorMessage = error
+        isLoading = false
+        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: { [weak self] in
+            self?.errorMessage = nil
+        })
     }
 }
