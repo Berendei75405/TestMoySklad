@@ -33,9 +33,6 @@ enum MediaType: String, Codable {
 //MARK: - ProductMeta
 struct ProductMeta: Codable {
     let href: String
-    let type: String
-    let mediaType: MediaType
-    let size, limit, offset: Int
 }
 
 //MARK: - Row
@@ -43,6 +40,7 @@ struct Row: Codable {
     let updated, name: String
     let description: String?
     let images: Files
+    let pathName: String
     let salePrices: [SalePrice]
     let weight, volume: Int
     let minimumBalance: Int?
@@ -50,7 +48,7 @@ struct Row: Codable {
     let tobacco: Bool?
 
     enum CodingKeys: String, CodingKey {
-        case updated, name, description, images, salePrices, weight, volume, minimumBalance, article, tobacco
+        case updated, name, description, images, salePrices, weight, volume, minimumBalance, article, tobacco, pathName
     }
 }
 

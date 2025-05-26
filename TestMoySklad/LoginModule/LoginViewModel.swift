@@ -28,7 +28,9 @@ final class LoginViewModel: ObservableObject {
          keychainManager: KeychainManagerProtocol) {
         self.networkManager = networkManager
         self.keychainManager = keychainManager
-        saveLoginAndPassword()
+        if checkToken() == nil {
+            saveLoginAndPassword()
+        }
     }
     
     //MARK: - fetchToken
@@ -99,7 +101,12 @@ final class LoginViewModel: ObservableObject {
             
             try keychainManager.saveItem(username, itemClass: .generic, key: key)
         } catch let keychainError as KeychainError {
-            print(keychainError)
+            switch keychainError {
+            case .duplicateItem:
+                return
+            default:
+                print(keychainError)
+            }
         } catch {
             print(error)
         }
@@ -113,7 +120,12 @@ final class LoginViewModel: ObservableObject {
             
             try keychainManager.saveItem(password, itemClass: .generic, key: key)
         } catch let keychainError as KeychainError {
-            print(keychainError)
+            switch keychainError {
+            case .duplicateItem:
+                return
+            default:
+                print(keychainError)
+            }
         } catch {
             print(error)
         }

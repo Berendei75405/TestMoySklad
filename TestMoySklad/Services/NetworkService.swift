@@ -9,6 +9,7 @@ import Foundation
 
 protocol NetworkServiceProtocol: AnyObject {
     func executeRequest<T: Decodable>(request: URLRequest) async throws -> T
+    func executeRequest(request: URLRequest) async throws -> Data
 }
 
 final class NetworkService: NetworkServiceProtocol {
@@ -52,7 +53,30 @@ final class NetworkService: NetworkServiceProtocol {
                 throw NetworkError.error(error)
             }
         }
-        
+    }
+    
+    ///Получение Data
+    func executeRequest(request: URLRequest) async throws -> Data {
+        do {
+            let (data, response) = try await URLSession.shared.data(for: request)
+            
+            guard let httpResponse = response as? HTTPURLResponse else {
+                throw NetworkError.unknownError
+            }
+            
+            //обработка ошибок
+            switch httpResponse.statusCode {
+            case 300..<400:
+                throw NetworkError.theRequestedResourceMoved
+            case 400..<500:
+                throw NetworkError.invalidSyntaxOrCannotBeExecuted
+            case 500..<600:
+                throw NetworkError.serverError
+            default:
+                break
+            }
+            
+            return data
+        }
     }
 }
-

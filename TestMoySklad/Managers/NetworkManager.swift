@@ -10,10 +10,13 @@ import Foundation
 protocol NetworkManagerProtocol: AnyObject {
     func getAccessToken(username: String,
                         password: String) async throws -> AccessToken
-    func getProducts(token: String) async throws -> Product
+    func getProduct(token: String) async throws -> Product
+    func getGroup(url: String, token: String) async throws -> GroupModel
+    func loadImage(from url: String, token: String) async throws -> Data
 }
 
 final class NetworkManager: NetworkManagerProtocol {
+    
     var networkService: NetworkServiceProtocol!
     
     //MARK: - init
@@ -42,11 +45,33 @@ final class NetworkManager: NetworkManagerProtocol {
         return try await networkService.executeRequest(request: request)
     }
     
-    //MARK: - getProducts
-    func getProducts(token: String) async throws -> Product {
+    //MARK: - getProduct
+    func getProduct(token: String) async throws -> Product {
         guard let url = URL(string: "https://api.moysklad.ru/api/remap/1.2/entity/product") else {
             throw NetworkError.invalidURL
         }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        return try await networkService.executeRequest(request: request)
+    }
+    
+    //MARK: - loadImage
+    func loadImage(from url: String, token: String) async throws -> Data {
+        guard let url = URL(string: url) else { throw NetworkError.invalidURL }
+        
+        var request = URLRequest(url: url)
+        request.httpMethod = "GET"
+        request.addValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        
+        return try await networkService.executeRequest(request: request)
+    }
+    
+    func getGroup(url: String,
+                  token: String) async throws -> GroupModel {
+        guard let url = URL(string: url) else { throw NetworkError.invalidURL }
         
         var request = URLRequest(url: url)
         request.httpMethod = "GET"
