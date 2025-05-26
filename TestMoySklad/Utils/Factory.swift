@@ -7,7 +7,7 @@
 
 import Foundation
 
-final class DependencyInjector: AnyObject {
+final class Factory: AnyObject {
     //MARK: - resolvePostViewModel
     static func getLoginViewModel() -> LoginViewModel {
         let networkService = NetworkService()
@@ -32,5 +32,15 @@ final class DependencyInjector: AnyObject {
         
         return TobaccoViewModel(keychainManager: keychainManager,
                                 networkManager: networkManager)
+    }
+    
+    //MARK: - getGroupViewModel
+    static func getGroupViewModel() -> GroupViewModel {
+        let keychainManager = KeychainManager()
+        let networkService = NetworkService()
+        let networkManager = NetworkManager(networkService: networkService)
+        
+        return GroupViewModel(networkManager: networkManager,
+                              keychainManager: keychainManager)
     }
 }

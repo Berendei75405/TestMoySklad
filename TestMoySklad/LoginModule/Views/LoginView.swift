@@ -52,7 +52,7 @@ struct LoginView: View {
         }
         //появление следующего экрана при удачной авторизации
         .fullScreenCover(isPresented: $viewModel.isShowScreen, content: {
-            TobaccoView(viewModel: DependencyInjector.getTobaccoViewModel())
+            GroupView(viewModel: Factory.getGroupViewModel())
         })
         .background(Color("background"))
     }
@@ -85,5 +85,5 @@ struct LoginView: View {
 }
 
 #Preview {
-    LoginView(viewModel: DependencyInjector.getLoginViewModel())
+    LoginView(viewModel: Factory.getLoginViewModel())
 }

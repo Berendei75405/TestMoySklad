@@ -11,7 +11,7 @@ import SwiftUI
 struct TestMoySkladApp: App {
     var body: some Scene {
         WindowGroup {
-            FirstScreen(viewModel: DependencyInjector.getFirstScreenViewModel())
+            FirstScreen(viewModel: Factory.getFirstScreenViewModel())
         }
     }
 }

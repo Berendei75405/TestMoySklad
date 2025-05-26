@@ -18,13 +18,13 @@ struct FirstScreen: View {
     
     var body: some View {
         if viewModel.checkToken() == nil {
-            LoginView(viewModel: DependencyInjector.getLoginViewModel())
+            LoginView(viewModel: Factory.getLoginViewModel())
         } else {
-            TobaccoView(viewModel: DependencyInjector.getTobaccoViewModel())
+            GroupView(viewModel: Factory.getGroupViewModel())
         }
     }
 }
 
 #Preview {
-    FirstScreen(viewModel: DependencyInjector.getFirstScreenViewModel())
+    FirstScreen(viewModel: Factory.getFirstScreenViewModel())
 }
