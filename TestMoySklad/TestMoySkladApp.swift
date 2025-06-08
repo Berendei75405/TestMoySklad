@@ -11,7 +11,10 @@ import SwiftUI
 struct TestMoySkladApp: App {
     var body: some Scene {
         WindowGroup {
-            FirstScreen(viewModel: Factory.getFirstScreenViewModel())
+            GeometryReader { proxy in
+                FirstScreen(viewModel: Factory.getFirstScreenViewModel())
+                    .environment(\.mainWindowSize, proxy.size)
+            }
         }
     }
 }

@@ -24,13 +24,15 @@ struct GroupView: View {
     }
     
     var body: some View {
-        VStack {
+        ZStack {
             ScrollView(.vertical) {
-                Text("Категории товаров")
-                    .font(.largeTitle)
-                    .fontWeight(.bold)
-                    .foregroundColor(Color("other"))
-                    .padding(.top, 16)
+                VStack {
+                    Text("Категории товаров")
+                        .font(.largeTitle)
+                        .fontWeight(.bold)
+                        .foregroundColor(Color("other"))
+                        .padding(.top, 16)
+                }
                 LazyVGrid(columns: colomns,
                           alignment: .center,
                           spacing: 20,
@@ -40,6 +42,10 @@ struct GroupView: View {
                 })
                 .padding(.horizontal, 16)
             }
+            //загрузка
+            LoadView(isLoading: $viewModel.isLoading)
+            //показ ошибки
+            ErrorView(showError: $viewModel.errorMessage)
         }
         //при запуске
         .onAppear {
@@ -91,5 +97,8 @@ struct GroupView: View {
 }
 
 #Preview {
-    GroupView(viewModel: Factory.getGroupViewModel())
+    GeometryReader { proxy in
+        GroupView(viewModel: Factory.getGroupViewModel())
+            .environment(\.mainWindowSize, proxy.size)
+    }
 }
