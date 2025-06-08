@@ -31,7 +31,10 @@ final class GroupViewModel: ObservableObject {
     
     //MARK: - getGroupModel
     func getGroupModel() async {
-        //isLoading = true
+        await MainActor.run {
+            isLoading = true
+            errorMessage = nil
+        }
         
         do {
             await updateToken()
@@ -40,6 +43,7 @@ final class GroupViewModel: ObservableObject {
             await getImages(product: product)
             await MainActor.run {
                 self.product = product
+                isLoading = false
             }
         } catch let networkError as NetworkError {
             showError(error: networkError.description)
@@ -60,8 +64,10 @@ final class GroupViewModel: ObservableObject {
                                                                  key: key)
             return token
         } catch let keychainError as KeychainError {
+            showError(error: keychainError.description)
             return keychainError.description
         } catch {
+            showError(error: error.localizedDescription)
             return error.localizedDescription
         }
     }
@@ -89,9 +95,6 @@ final class GroupViewModel: ObservableObject {
             self?.errorMessage = error
             self?.isLoading = false
         }
-        DispatchQueue.main.asyncAfter(deadline: .now() + 5, execute: { [weak self] in
-            self?.errorMessage = nil
-        })
     }
     
     //MARK: - filterGroupName
@@ -151,10 +154,8 @@ final class GroupViewModel: ObservableObject {
             do {
                 imagesArray[index] = try await networkManager.loadImage(from: urlArray[index], token: token)
             } catch let networkError as NetworkError {
-                print(networkError)
                 showError(error: networkError.description)
             } catch {
-                print(error)
                 showError(error: error.localizedDescription)
             }
         }

@@ -16,6 +16,17 @@ final class NetworkService: NetworkServiceProtocol {
     
     //MARK: - executeRequest
     func executeRequest<T: Decodable>(request: URLRequest) async throws -> T {
+        //декодер
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        
+        //проверяем есть ли кеш по запросу, если нету, то отправляем запрос
+        if let cachedResponse = URLCache.shared.cachedResponse(for: request) {
+            do {
+                return try decoder.decode(T.self, from: cachedResponse.data)
+            }
+        }
+        
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
@@ -35,11 +46,11 @@ final class NetworkService: NetworkServiceProtocol {
                 break
             }
             
-            //декодирование
-            let decoder = JSONDecoder()
-            decoder.dateDecodingStrategy = .iso8601
-            
             do {
+                //кеширование
+                let cachedResponse = CachedURLResponse(response: response, data: data)
+                URLCache.shared.storeCachedResponse(cachedResponse, for: request)
+                
                 return try decoder.decode(T.self, from: data)
             } catch {
                 throw NetworkError.error(error)
@@ -57,6 +68,17 @@ final class NetworkService: NetworkServiceProtocol {
     
     ///Получение Data
     func executeRequest(request: URLRequest) async throws -> Data {
+        //декодер
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        
+        //проверяем есть ли кеш по запросу, если нету, то отправляем запрос
+        if let cachedResponse = URLCache.shared.cachedResponse(for: request) {
+            do {
+                return cachedResponse.data
+            }
+        }
+        
         do {
             let (data, response) = try await URLSession.shared.data(for: request)
             
@@ -75,6 +97,9 @@ final class NetworkService: NetworkServiceProtocol {
             default:
                 break
             }
+            //кеширование
+            let cachedResponse = CachedURLResponse(response: response, data: data)
+            URLCache.shared.storeCachedResponse(cachedResponse, for: request)
             
             return data
         }
